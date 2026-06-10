@@ -1,10 +1,15 @@
 const Button = (props) => {
-	const { className = '', type, children, onClick } = props;
-	return (
-		<button className={`button ${className}`} type={type} onClick={onClick}>
-			{children}
-		</button>
-	);
+  const { className = "", type, children, onClick, isDisabled } = props;
+  return (
+    <button
+      className={`button ${className}`}
+      type={type}
+      onClick={onClick}
+      disabled={isDisabled}
+    >
+      {children}
+    </button>
+  );
 };
 
 export default Button;

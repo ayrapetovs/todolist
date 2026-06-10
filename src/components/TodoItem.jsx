@@ -1,7 +1,13 @@
+import { memo, useContext } from 'react';
+import { TasksContext } from '../context/TasksContext.jsx';
 const TodoItem = (props) => {
-	const { title, isDone, className, id, deleteTask, toggleTaskComplete, ref } = props;
+	const { title, isDone, className, id } = props;
+	const { firstIncompleteTaskRef, firstIncompleteTaskId, deleteTask, toggleTaskComplete } =
+		useContext(TasksContext);
 	return (
-		<li className={`todo-item ${className}`} ref={ref}>
+		<li
+			className={`todo-item ${className}`}
+			ref={id === firstIncompleteTaskId ? firstIncompleteTaskRef : null}>
 			<input
 				className="todo-item__checkbox"
 				id={id}
@@ -36,4 +42,4 @@ const TodoItem = (props) => {
 	);
 };
 
-export default TodoItem;
+export default memo(TodoItem);
