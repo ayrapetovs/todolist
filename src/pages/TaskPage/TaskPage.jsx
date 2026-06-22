@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import tasksAPI from "../api/tasksAPI";
+import tasksAPI from "../../api/tasksAPI";
 
-export const TaskPage = (props) => {
+const TaskPage = (props) => {
   const { params } = props;
   const taskId = params.id;
 
@@ -33,3 +33,4 @@ export const TaskPage = (props) => {
     </div>
   );
 };
+export default TaskPage;
