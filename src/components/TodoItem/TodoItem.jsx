@@ -1,0 +1,71 @@
+import { memo, useContext } from "react";
+import { TasksContext } from "../../context/TasksContext.jsx";
+import RouterLink from "../RouterLink/RouterLink.jsx";
+
+import styles from "./TodoItem.module.css";
+
+const TodoItem = (props) => {
+  const { title, isDone, className, id } = props;
+  const {
+    firstIncompleteTaskRef,
+    firstIncompleteTaskId,
+    deleteTask,
+    toggleTaskComplete,
+    disappearingTaskId,
+    appearingTaskId,
+  } = useContext(TasksContext);
+
+  return (
+    <li
+      className={`
+        ${styles["todo-item"]}
+        ${className}
+        ${disappearingTaskId === id ? styles["is-disappearing"] : ""}
+        ${appearingTaskId === id ? styles["is-appearing"] : ""}
+      `}
+      ref={id === firstIncompleteTaskId ? firstIncompleteTaskRef : null}
+    >
+      <input
+        className={`${styles["todo-item__checkbox"]}`}
+        id={id}
+        type="checkbox"
+        checked={isDone}
+        onChange={() => toggleTaskComplete(id, !isDone)}
+      />
+      <RouterLink to={`/tasks/${id}`} aria-label="detail page">
+        {title}
+      </RouterLink>
+      <label
+        className={`${styles["todo-item__label"]} visually-hidden`}
+        htmlFor={id}
+      >
+        {title}
+      </label>
+
+      <button
+        className={`${styles["todo-item__delete-button"]}`}
+        aria-label="Delete"
+        title="Delete"
+        onClick={() => deleteTask(id)}
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15 5L5 15M5 5L15 15"
+            stroke="#757575"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    </li>
+  );
+};
+
+export default memo(TodoItem);
