@@ -13,9 +13,6 @@ export const TasksProvider = (props) => {
         deleteTask,
         onClickDeleteAll,
         toggleTaskComplete,
-
-        taskTitle,
-        setTaskTitle,
         searchQuery,
         setSearchQuery,
         newTaskInputRef,
@@ -32,9 +29,6 @@ export const TasksProvider = (props) => {
         deleteTask,
         onClickDeleteAll,
         toggleTaskComplete,
-
-        taskTitle,
-        setTaskTitle,
         searchQuery,
         setSearchQuery,
         newTaskInputRef,
@@ -44,12 +38,11 @@ export const TasksProvider = (props) => {
         firstIncompleteTaskRef,
         firstIncompleteTaskId
     }), [tasks, filteredTasks, deleteTask, onClickDeleteAll, toggleTaskComplete,
-
-        taskTitle, setTaskTitle, searchQuery, setSearchQuery, newTaskInputRef, addTask, disappearingTaskId, appearingTaskId, firstIncompleteTaskRef, firstIncompleteTaskId])
+        searchQuery, setSearchQuery, newTaskInputRef, addTask, disappearingTaskId, appearingTaskId, firstIncompleteTaskRef, firstIncompleteTaskId])
 
     return (<TasksContext.Provider
-            value={value}
-        >
-            {children}
-        </TasksContext.Provider>);
+        value={value}
+    >
+        {children}
+    </TasksContext.Provider>);
 };
