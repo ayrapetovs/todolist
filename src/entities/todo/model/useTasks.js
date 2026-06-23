@@ -1,103 +1,111 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {useCallback, useEffect, useMemo, useRef, useState, useReducer} from "react";
 import tasksAPI from "@/shared/api/tasks";
 
+const tasksReducer = (state = {}, action) => {
+    switch (action.type) {
+        case "SET_ALL": {
+            return Array.isArray(action.tasks) ? action.tasks : state;
+        }
+        case "ADD": {
+            return [...state, action.task];
+        }
+        case "TOGGLE_COMPLETE": {
+            const {id, isDone} = action;
+
+            return state.map((task) => {
+                return task.id === id ? {...task, isDone} : task;
+            })
+        }
+        case "DELETE": {
+            return state.filter((task) => task.id !== action.id);
+        }
+        case "DELETE_ALL": {
+            return []
+        }
+        default: {
+            return state;
+        }
+    }
+}
+
 const useTasks = () => {
-  const [tasks, setTasks] = useState([]);
+    const [tasks, dispatch] = useReducer(tasksReducer, []);
 
-  const [taskTitle, setTaskTitle] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [disappearingTaskId, setDisappearingTaskId] = useState(null);
-  const [appearingTaskId, setAppearingTaskId] = useState(null);
-  const newTaskInputRef = useRef(null);
+    const [taskTitle, setTaskTitle] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [disappearingTaskId, setDisappearingTaskId] = useState(null);
+    const [appearingTaskId, setAppearingTaskId] = useState(null);
 
-  const onClickDeleteAll = useCallback(() => {
-    tasksAPI.deleteAll(tasks).then(() => {
-      setTasks([]);
-    });
-  }, [tasks]);
+    const newTaskInputRef = useRef(null);
 
-  const deleteTask = useCallback(
-    (id) => {
-      tasksAPI.delete(id).then(() => {
-        setDisappearingTaskId(id);
-        console.log(id);
-        setTimeout(() => {
-          setTasks(tasks.filter((task) => task.id !== id));
+    const onClickDeleteAll = useCallback(() => {
+        tasksAPI.deleteAll(tasks).then(() => {
+            dispatch({type: 'DELETE_ALL'});
+        });
+    }, [tasks]);
 
-          setDisappearingTaskId(null);
-        }, 400);
-      });
-    },
-    [tasks],
-  );
+    const deleteTask = useCallback((id) => {
+        tasksAPI.delete(id).then(() => {
+            setDisappearingTaskId(id);
+            setTimeout(() => {
+                dispatch({type: 'DELETE', id});
 
-  const toggleTaskComplete = useCallback(
-    (id, isDone) => {
-      tasksAPI.toggleComplete(id, isDone).then(() =>
-        setTasks(
-          tasks.map((task) => {
-            if (task.id === id) {
-              return { ...task, isDone };
-            }
+                setDisappearingTaskId(null);
+            }, 400);
+        });
+    }, [],);
 
-            return task;
-          }),
-        ),
-      );
-    },
-    [tasks],
-  );
+    const toggleTaskComplete = useCallback((id, isDone) => {
+        tasksAPI.toggleComplete(id, isDone).then(() => dispatch({type: 'TOGGLE_COMPLETE', id, isDone}),);
+    }, [],);
 
-  const addTask = useCallback((title) => {
-    const newTask = {
-      title,
-      isDone: false,
+    const addTask = useCallback((title) => {
+        const newTask = {
+            title, isDone: false,
+        };
+
+        tasksAPI.add(newTask).then((addedTask) => {
+            dispatch({type: 'ADD', task: addedTask})
+            setTaskTitle("");
+            setSearchQuery("");
+            newTaskInputRef.current?.focus();
+
+            setAppearingTaskId(addedTask.id);
+            console.log(appearingTaskId);
+            setTimeout(() => {
+                setAppearingTaskId(null);
+            }, 400);
+        });
+    }, []);
+
+    useEffect(() => {
+        newTaskInputRef.current?.focus();
+
+        tasksAPI.getAll().then((serverTasks) => {
+            dispatch({type: 'SET_ALL', tasks: serverTasks})
+        });
+    }, []);
+
+    const filteredTasks = useMemo(() => {
+        const clearSearchQuery = searchQuery.trim().toLowerCase();
+        return clearSearchQuery.length > 0 ? tasks.filter((task) => task.title.toLowerCase().includes(clearSearchQuery),) : null;
+    }, [searchQuery, tasks]);
+
+    return {
+        tasks,
+        filteredTasks,
+        deleteTask,
+        onClickDeleteAll,
+        toggleTaskComplete,
+        disappearingTaskId,
+        appearingTaskId,
+        taskTitle,
+        setTaskTitle,
+        searchQuery,
+        setSearchQuery,
+        newTaskInputRef,
+        addTask,
     };
-
-    tasksAPI.add(newTask).then((addedTask) => {
-      setTasks((prevTasks) => [...prevTasks, addedTask]);
-      setTaskTitle("");
-      setSearchQuery("");
-      newTaskInputRef.current?.focus();
-
-      setAppearingTaskId(addedTask.id);
-      console.log(appearingTaskId);
-      setTimeout(() => {
-        setAppearingTaskId(null);
-      }, 400);
-    });
-  }, []);
-
-  useEffect(() => {
-    newTaskInputRef.current?.focus();
-
-    tasksAPI.getAll().then(setTasks);
-  }, []);
-
-  const filteredTasks = useMemo(() => {
-    const clearSearchQuery = searchQuery.trim().toLowerCase();
-    return clearSearchQuery.length > 0
-      ? tasks.filter((task) =>
-          task.title.toLowerCase().includes(clearSearchQuery),
-        )
-      : null;
-  }, [searchQuery, tasks]);
-
-  return {
-    tasks,
-    filteredTasks,
-    deleteTask,
-    onClickDeleteAll,
-    toggleTaskComplete,
-    disappearingTaskId,
-    appearingTaskId,
-    taskTitle,
-    setTaskTitle,
-    searchQuery,
-    setSearchQuery,
-    newTaskInputRef,
-    addTask,
-  };
 };
 
 export default useTasks;
