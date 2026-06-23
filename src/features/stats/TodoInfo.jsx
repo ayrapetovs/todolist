@@ -1,5 +1,5 @@
 import { memo, useContext, useMemo } from "react";
-import { TasksContext } from "../../context/TasksContext.jsx";
+import { TasksContext } from "@/entities/todo";
 const TodoInfo = () => {
   const { tasks, onClickDeleteAll } = useContext(TasksContext);
   const total = tasks.length;
