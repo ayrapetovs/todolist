@@ -1,4 +1,4 @@
-export const URL = "http://localhost:3002/tasks";
+export const URL = "https://4e0b632de96ca512.mokky.dev/tasks";
 
 const headers = {
   "Content-Type": "application/json",
